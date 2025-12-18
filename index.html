@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gobierno Patrimonial — Dashboard Ejecutivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-header { background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); }
+        .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 600; }
+        .tab-inactive { border-bottom: 3px solid transparent; color: #6b7280; }
+        .tab-inactive:hover { color: #374151; }
+        .cubo-rentas { border-left: 4px solid #8b5cf6; }
+        .cubo-growth { border-left: 4px solid #06b6d4; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .status-live { background: #10b981; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 50; }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-header text-white py-4 px-6 sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-semibold">Gobierno Patrimonial</h1>
+                <p class="text-blue-200 text-sm">Datos verificados — 18 Diciembre 2025 (actualizado)</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="text-right text-sm">
+                    <p class="text-blue-200">Última actualización</p>
+                    <p id="lastUpdate" class="font-medium">18/12/2025</p>
+                </div>
+                <span class="status-dot status-live" title="Datos actualizados"></span>
+                <button onclick="saveSnapshot()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium transition">
+                    📸 Snapshot
+                </button>
+                <button onclick="exportData()" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded text-sm font-medium transition">
+                    💾 Backup
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white border-b">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex space-x-6 overflow-x-auto">
+                <button onclick="showTab('overview')" id="tab-overview" class="py-3 px-1 tab-active whitespace-nowrap">📊 Resumen</button>
+                <button onclick="showTab('platforms')" id="tab-platforms" class="py-3 px-1 tab-inactive whitespace-nowrap">🏦 Plataformas</button>
+                <button onclick="showTab('positions')" id="tab-positions" class="py-3 px-1 tab-inactive whitespace-nowrap">📋 Posiciones</button>
+                <button onclick="showTab('fiscal')" id="tab-fiscal" class="py-3 px-1 tab-inactive whitespace-nowrap">🧾 Análisis Fiscal</button>
+                <button onclick="showTab('strategy')" id="tab-strategy" class="py-3 px-1 tab-inactive whitespace-nowrap">🎯 Estrategia</button>
+                <button onclick="showTab('roadmap')" id="tab-roadmap" class="py-3 px-1 tab-inactive whitespace-nowrap">🧭 Roadmap</button>
+                <button onclick="showTab('historico')" id="tab-historico" class="py-3 px-1 tab-inactive whitespace-nowrap">📈 Histórico</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-6">
+        
+        <!-- TAB: OVERVIEW -->
+        <div id="content-overview">
+            <!-- KPIs principales -->
+            <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="card p-4">
+                    <p class="text-xs text-gray-500 mb-1">Patrimonio Total</p>
+                    <p class="text-2xl font-bold text-gray-900">€4.988.581</p>
+                    <p class="text-xs text-green-600 mt-1">Verificado 18/12/2025</p>
+                </div>
+                <div class="card p-4">
+                    <p class="text-xs text-gray-500 mb-1">Activos Financieros</p>
+                    <p class="text-2xl font-bold text-blue-600">€2.404.932</p>
+                    <p class="text-xs text-gray-400 mt-1">48,2% del total</p>
+                </div>
+                <div class="card p-4">
+                    <p class="text-xs text-gray-500 mb-1">Inmuebles</p>
+                    <p class="text-2xl font-bold text-amber-600">€2.233.649</p>
+                    <p class="text-xs text-gray-400 mt-1">44,8% del total</p>
+                </div>
+                <div class="card p-4">
+                    <p class="text-xs text-gray-500 mb-1">Arte</p>
+                    <p class="text-2xl font-bold text-pink-600">€350.000</p>
+                    <p class="text-xs text-gray-400 mt-1">7,0% del total</p>
+                </div>
+            </section>
+
+            <!-- Desglose activos financieros -->
+            <section class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
+                <div class="card p-3 text-center">
+                    <p class="text-xs text-gray-500">Renta 4</p>
+                    <p class="text-lg font-bold text-gray-800">€625.514</p>
+                </div>
+                <div class="card p-3 text-center">
+                    <p class="text-xs text-gray-500">Cash/Divisas</p>
+                    <p class="text-lg font-bold text-gray-800">€685.050</p>
+                </div>
+                <div class="card p-3 text-center">
+                    <p class="text-xs text-gray-500">Wrappers</p>
+                    <p class="text-lg font-bold text-gray-800">€655.487</p>
+                </div>
+                <div class="card p-3 text-center">
+                    <p class="text-xs text-gray-500">Crypto</p>
+                    <p class="text-lg font-bold text-orange-600">€364.095</p>
+                </div>
+                <div class="card p-3 text-center">
+                    <p class="text-xs text-gray-500">Planes Pensiones</p>
+                    <p class="text-lg font-bold text-gray-800">€119.428</p>
+                </div>
+                <div class="card p-3 text-center">
+                    <p class="text-xs text-gray-500">Seguros Ahorro</p>
+                    <p class="text-lg font-bold text-gray-800">€36.470</p>
+                </div>
+            </section>
+
+            <!-- Gráficos -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                <div class="card p-5">
+                    <h2 class="font-semibold text-gray-800 mb-4">Distribución Patrimonio Total</h2>
+                    <div class="flex items-center justify-center">
+                        <canvas id="chartPatrimonio" width="280" height="280"></canvas>
+                    </div>
+                </div>
+                <div class="card p-5">
+                    <h2 class="font-semibold text-gray-800 mb-4">Actual vs Ideal (4 Cubos)</h2>
+                    <div class="flex items-center justify-center">
+                        <canvas id="chartComparativo" width="400" height="280"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Alertas y próximas acciones -->
+            <section class="card p-5">
+                <h2 class="font-semibold text-gray-800 mb-4">⚡ Próximas Acciones Prioritarias</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-red-50 rounded-lg border-l-4 border-red-500">
+                        <p class="font-medium text-red-800">1. Vender Acciones Españolas</p>
+                        <p class="text-sm text-gray-600 mt-1">8 posiciones → ETFs globales de dividendo</p>
+                        <p class="text-xs text-red-600 mt-2">Coste fiscal: €5.399 (1,1%)</p>
+                    </div>
+                    <div class="p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
+                        <p class="font-medium text-orange-800">2. Convertir GBP</p>
+                        <p class="text-sm text-gray-600 mt-1">£445K parados en Bankinter sin rendimiento</p>
+                        <p class="text-xs text-orange-600 mt-2">→ Revolut cuando GBP/EUR ≥ 1.17</p>
+                    </div>
+                    <div class="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                        <p class="font-medium text-yellow-800">3. Reducir Crypto</p>
+                        <p class="text-sm text-gray-600 mt-1">€364K (15% financiero) es excesivo</p>
+                        <p class="text-xs text-yellow-600 mt-2">→ Objetivo: 10% máximo</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- TAB: PLATFORMS -->
+        <div id="content-platforms" class="hidden">
+            <div class="space-y-4">
+                
+                <!-- Renta 4 -->
+                <div class="card p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 text-lg">🏦 Renta 4</h3>
+                            <p class="text-sm text-gray-500">Cuentas: LPM112 + ALM285</p>
+                        </div>
+                        <p class="text-2xl font-bold text-blue-600">€625.514</p>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Bolsa Nacional</p>
+                            <p class="font-semibold">€488.002</p>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <p class="text-xs text-purple-600">VHYL (Rentas)</p>
+                            <p class="font-semibold">€6.889</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs text-gray-500">ETFs Satélite</p>
+                            <p class="font-semibold">€96.911</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Fondos</p>
+                            <p class="font-semibold">€5.946</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Cash EUR</p>
+                            <p class="font-semibold">€27.766</p>
+                        </div>
+                        <div class="p-3 bg-red-50 rounded-lg">
+                            <p class="text-xs text-red-600">A vender</p>
+                            <p class="font-semibold text-red-700">€488.002</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RL360 -->
+                <div class="card p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 text-lg">🌐 RL360</h3>
+                            <p class="text-sm text-gray-500">Póliza PM10008711 · Desde Oct 2017</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold text-purple-600">€234.770</p>
+                            <p class="text-xs text-green-600">+56,5% desde inicio</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Aegon High Yield Bond</p>
+                            <p class="font-semibold">€39.456</p>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Janus Henderson Global</p>
+                            <p class="font-semibold">€183.590</p>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Vanguard Small Cap</p>
+                            <p class="font-semibold">€26.981</p>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Vanguard LifeStrategy 80</p>
+                            <p class="font-semibold">€54.525</p>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <p class="text-xs text-gray-500">iShares EuroStoxx 50</p>
+                            <p class="font-semibold">€48.430</p>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Cash interno</p>
+                            <p class="font-semibold">€4.195</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Utmost -->
+                <div class="card p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 text-lg">🌐 Utmost</h3>
+                            <p class="text-sm text-gray-500">Vision 40409332 · 12+ años</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-2xl font-bold text-indigo-600">€232.579</p>
+                            <p class="text-xs text-amber-600">Rescate: €226.736 (penaliz. 2,5%)</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="p-3 bg-indigo-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Fidelity Global Tech</p>
+                            <p class="font-semibold">€80.696</p>
+                        </div>
+                        <div class="p-3 bg-indigo-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Ninety One Global Str</p>
+                            <p class="font-semibold">€51.210</p>
+                        </div>
+                        <div class="p-3 bg-indigo-50 rounded-lg">
+                            <p class="text-xs text-gray-500">JPM Eur Strategic Grwt</p>
+                            <p class="font-semibold">€29.387</p>
+                        </div>
+                        <div class="p-3 bg-indigo-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Pictet Global Megatrend</p>
+                            <p class="font-semibold">€22.495</p>
+                        </div>
+                        <div class="p-3 bg-indigo-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Fidelity Euro Bond</p>
+                            <p class="font-semibold">€17.765</p>
+                        </div>
+                        <div class="p-3 bg-indigo-50 rounded-lg">
+                            <p class="text-xs text-gray-500">BGF Emerging Markets</p>
+                            <p class="font-semibold">€16.325</p>
+                        </div>
+                        <div class="p-3 bg-indigo-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Jupiter India Select</p>
+                            <p class="font-semibold">€14.701</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mapfre -->
+                <div class="card p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 text-lg">🔴 Mapfre</h3>
+                            <p class="text-sm text-gray-500">Cuenta *7151 + Seguros + Pensiones</p>
+                        </div>
+                        <p class="text-2xl font-bold text-red-600">€188.138</p>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="p-3 bg-red-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Fondos inversión</p>
+                            <p class="font-semibold">€53.565</p>
+                        </div>
+                        <div class="p-3 bg-red-50 rounded-lg">
+                            <p class="text-xs text-gray-500">ETFs (Defense + Gold)</p>
+                            <p class="font-semibold">€57.413</p>
+                        </div>
+                        <div class="p-3 bg-red-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Dividendo Europa</p>
+                            <p class="font-semibold">€36.470</p>
+                        </div>
+                        <div class="p-3 bg-red-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Plan Pensiones Renta</p>
+                            <p class="font-semibold">€37.765</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ING -->
+                <div class="card p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 text-lg">🧡 ING</h3>
+                            <p class="text-sm text-gray-500">Planes de inversión</p>
+                        </div>
+                        <p class="text-2xl font-bold text-orange-500">€81.675</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 bg-orange-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Plan Renta Fija Europea</p>
+                            <p class="font-semibold">€67.731</p>
+                        </div>
+                        <div class="p-3 bg-orange-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Plan S&P 500</p>
+                            <p class="font-semibold">€13.932</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cash y Divisas -->
+                <div class="card p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 text-lg">💵 Cash y Divisas</h3>
+                            <p class="text-sm text-gray-500">Múltiples cuentas</p>
+                        </div>
+                        <p class="text-2xl font-bold text-green-600">€685.050</p>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <div class="p-3 bg-green-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Bankinter GBP (£420K)</p>
+                            <p class="font-semibold">€491.400</p>
+                        </div>
+                        <div class="p-3 bg-green-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Bankinter GBP (£25K)</p>
+                            <p class="font-semibold">€29.250</p>
+                        </div>
+                        <div class="p-3 bg-green-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Openbank USD ($75K)</p>
+                            <p class="font-semibold">€71.400</p>
+                        </div>
+                        <div class="p-3 bg-green-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Revolut EUR</p>
+                            <p class="font-semibold">€60.000</p>
+                        </div>
+                        <div class="p-3 bg-green-50 rounded-lg">
+                            <p class="text-xs text-gray-500">Rand EUR</p>
+                            <p class="font-semibold">€33.000</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crypto -->
+                <div class="card p-5">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 text-lg">₿ Crypto</h3>
+                            <p class="text-sm text-gray-500">Ledger + Kraken + Bit2Me</p>
+                        </div>
+                        <p class="text-2xl font-bold text-amber-500">€364.095</p>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="p-3 bg-amber-50 rounded-lg">
+                            <p class="text-xs text-gray-500">BTC (3,22 total)</p>
+                            <p class="font-semibold">€263.045</p>
+                        </div>
+                        <div class="p-3 bg-amber-50 rounded-lg">
+                            <p class="text-xs text-gray-500">USDC (79.700)</p>
+                            <p class="font-semibold">€75.905</p>
+                        </div>
+                        <div class="p-3 bg-amber-50 rounded-lg">
+                            <p class="text-xs text-gray-500">XRP (7.270)</p>
+                            <p class="font-semibold">€12.860</p>
+                        </div>
+                        <div class="p-3 bg-amber-50 rounded-lg">
+                            <p class="text-xs text-gray-500">EURC Bit2Me</p>
+                            <p class="font-semibold">€6.000</p>
+                        </div>
+                        <div class="p-3 bg-amber-50 rounded-lg">
+                            <p class="text-xs text-gray-500">PAXG (0,99)</p>
+                            <p class="font-semibold">€3.810</p>
+                        </div>
+                        <div class="p-3 bg-amber-50 rounded-lg">
+                            <p class="text-xs text-gray-500">ETH (1,0)</p>
+                            <p class="font-semibold">€2.475</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TAB: POSITIONS -->
+        <div id="content-positions" class="hidden">
+            <div class="card p-5 mb-4">
+                <h2 class="font-semibold text-gray-800 mb-4">📋 Todas las Posiciones — Renta 4</h2>
+                
+                <h3 class="font-medium text-gray-700 mt-4 mb-2">Bolsa Nacional + Internacional (€488.002)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="text-left p-2">Acción</th>
+                                <th class="text-right p-2">Títulos</th>
+                                <th class="text-right p-2">Precio</th>
+                                <th class="text-right p-2">Valor</th>
+                                <th class="text-right p-2">P/L</th>
+                                <th class="text-center p-2">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr>
+                                <td class="p-2 font-medium">IAG (Int. Cons. Air)</td>
+                                <td class="p-2 text-right">14.515</td>
+                                <td class="p-2 text-right">€4,79</td>
+                                <td class="p-2 text-right font-semibold">€69.614</td>
+                                <td class="p-2 text-right text-green-600">+€6.605</td>
+                                <td class="p-2 text-center"><span class="badge bg-red-100 text-red-700">Vender</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Banco Sabadell</td>
+                                <td class="p-2 text-right">19.825</td>
+                                <td class="p-2 text-right">€3,37</td>
+                                <td class="p-2 text-right font-semibold">€66.830</td>
+                                <td class="p-2 text-right text-green-600">+€3.946</td>
+                                <td class="p-2 text-center"><span class="badge bg-yellow-100 text-yellow-700">Div 29/12</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Mapfre (acción)</td>
+                                <td class="p-2 text-right">15.415</td>
+                                <td class="p-2 text-right">€4,23</td>
+                                <td class="p-2 text-right font-semibold">€65.175</td>
+                                <td class="p-2 text-right text-green-600">+€3.205</td>
+                                <td class="p-2 text-center"><span class="badge bg-red-100 text-red-700">Vender</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Navigator (Lisboa)</td>
+                                <td class="p-2 text-right">20.585</td>
+                                <td class="p-2 text-right">€3,02</td>
+                                <td class="p-2 text-right font-semibold">€62.126</td>
+                                <td class="p-2 text-right text-red-600">-€918</td>
+                                <td class="p-2 text-center"><span class="badge bg-red-100 text-red-700">Vender</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Merlin Properties</td>
+                                <td class="p-2 text-right">5.045</td>
+                                <td class="p-2 text-right">€12,18</td>
+                                <td class="p-2 text-right font-semibold">€61.448</td>
+                                <td class="p-2 text-right text-red-600">-€2.079</td>
+                                <td class="p-2 text-center"><span class="badge bg-red-100 text-red-700">Vender</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Rovi</td>
+                                <td class="p-2 text-right">936</td>
+                                <td class="p-2 text-right">€60,65</td>
+                                <td class="p-2 text-right font-semibold">€56.768</td>
+                                <td class="p-2 text-right text-green-600">+€5.351</td>
+                                <td class="p-2 text-center"><span class="badge bg-red-100 text-red-700">Vender</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Sacyr</td>
+                                <td class="p-2 text-right">13.930</td>
+                                <td class="p-2 text-right">€3,79</td>
+                                <td class="p-2 text-right font-semibold">€52.823</td>
+                                <td class="p-2 text-right text-green-600">+€5.251</td>
+                                <td class="p-2 text-center"><span class="badge bg-yellow-100 text-yellow-700">Div 30/01</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Enagás</td>
+                                <td class="p-2 text-right">3.670</td>
+                                <td class="p-2 text-right">€13,46</td>
+                                <td class="p-2 text-right font-semibold">€49.380</td>
+                                <td class="p-2 text-right text-red-600">-€3.204</td>
+                                <td class="p-2 text-center"><span class="badge bg-red-100 text-red-700">Vender</span></td>
+                            </tr>
+                            <tr class="bg-blue-50">
+                                <td class="p-2 font-medium">Repsol (LPM112)</td>
+                                <td class="p-2 text-right">246</td>
+                                <td class="p-2 text-right">€15,60</td>
+                                <td class="p-2 text-right font-semibold">€3.838</td>
+                                <td class="p-2 text-right text-red-600">-€368</td>
+                                <td class="p-2 text-center"><span class="badge bg-yellow-100 text-yellow-700">Div 14/01</span></td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="bg-gray-50 font-semibold">
+                            <tr>
+                                <td class="p-2">TOTAL</td>
+                                <td class="p-2"></td>
+                                <td class="p-2"></td>
+                                <td class="p-2 text-right">€488.002</td>
+                                <td class="p-2 text-right text-green-600">+€17.789</td>
+                                <td class="p-2"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <h3 class="font-medium text-gray-700 mt-6 mb-2">ETFs (€103.801)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="text-left p-2">ETF</th>
+                                <th class="text-right p-2">Títulos</th>
+                                <th class="text-right p-2">Valor</th>
+                                <th class="text-center p-2">Cubo</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr class="bg-purple-50">
+                                <td class="p-2 font-medium">Vanguard FTSE All-World High Div (VHYL)</td>
+                                <td class="p-2 text-right">100</td>
+                                <td class="p-2 text-right font-semibold">€6.889</td>
+                                <td class="p-2 text-center"><span class="badge bg-purple-100 text-purple-700">RENTAS</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Invesco Blockchain</td>
+                                <td class="p-2 text-right">220</td>
+                                <td class="p-2 text-right font-semibold">€28.329</td>
+                                <td class="p-2 text-center"><span class="badge bg-amber-100 text-amber-700">Satélite</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">VanEck Semiconductor</td>
+                                <td class="p-2 text-right">530</td>
+                                <td class="p-2 text-right font-semibold">€26.845</td>
+                                <td class="p-2 text-center"><span class="badge bg-amber-100 text-amber-700">Satélite</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Amundi Nasdaq 100</td>
+                                <td class="p-2 text-right">100</td>
+                                <td class="p-2 text-right font-semibold">€24.265</td>
+                                <td class="p-2 text-center"><span class="badge bg-amber-100 text-amber-700">Satélite</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">iShares MSCI India</td>
+                                <td class="p-2 text-right">2.130</td>
+                                <td class="p-2 text-right font-semibold">€17.472</td>
+                                <td class="p-2 text-center"><span class="badge bg-amber-100 text-amber-700">Satélite</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Resumen vender -->
+            <div class="card p-5 bg-red-50">
+                <h3 class="font-semibold text-red-800 mb-3">📉 Resumen: Posiciones a Vender → ETFs Dividendo</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">IAG</p>
+                        <p class="font-bold text-red-700">€69.614</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">Sabadell</p>
+                        <p class="font-bold text-red-700">€66.830</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">Mapfre</p>
+                        <p class="font-bold text-red-700">€65.175</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">Navigator</p>
+                        <p class="font-bold text-red-700">€62.126</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">Merlin</p>
+                        <p class="font-bold text-red-700">€61.448</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">Rovi</p>
+                        <p class="font-bold text-red-700">€56.768</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">Sacyr</p>
+                        <p class="font-bold text-red-700">€52.823</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">Enagás</p>
+                        <p class="font-bold text-red-700">€49.380</p>
+                    </div>
+                </div>
+                <div class="mt-4 p-3 bg-white rounded-lg text-center">
+                    <p class="text-sm text-gray-600">TOTAL A VENDER</p>
+                    <p class="font-bold text-red-800 text-2xl">€484.164</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: FISCAL -->
+        <div id="content-fiscal" class="hidden">
+            <div class="card p-6 mb-4">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">🧾 Análisis Fiscal — Venta Acciones Españolas</h2>
+                
+                <h3 class="font-medium text-gray-700 mb-3">Plusvalías y Minusvalías por Posición</h3>
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="text-left p-2">Acción</th>
+                                <th class="text-right p-2">Coste Adquisición</th>
+                                <th class="text-right p-2">Valor Actual</th>
+                                <th class="text-right p-2">Plusvalía</th>
+                                <th class="text-right p-2">Minusvalía</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr>
+                                <td class="p-2 font-medium">IAG</td>
+                                <td class="p-2 text-right">€63.009</td>
+                                <td class="p-2 text-right">€69.614</td>
+                                <td class="p-2 text-right text-green-600 font-semibold">+€6.605</td>
+                                <td class="p-2 text-right">-</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Rovi</td>
+                                <td class="p-2 text-right">€51.417</td>
+                                <td class="p-2 text-right">€56.768</td>
+                                <td class="p-2 text-right text-green-600 font-semibold">+€5.351</td>
+                                <td class="p-2 text-right">-</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Sacyr</td>
+                                <td class="p-2 text-right">€47.572</td>
+                                <td class="p-2 text-right">€52.823</td>
+                                <td class="p-2 text-right text-green-600 font-semibold">+€5.251</td>
+                                <td class="p-2 text-right">-</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Sabadell</td>
+                                <td class="p-2 text-right">€62.884</td>
+                                <td class="p-2 text-right">€66.830</td>
+                                <td class="p-2 text-right text-green-600 font-semibold">+€3.946</td>
+                                <td class="p-2 text-right">-</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 font-medium">Mapfre</td>
+                                <td class="p-2 text-right">€61.970</td>
+                                <td class="p-2 text-right">€65.175</td>
+                                <td class="p-2 text-right text-green-600 font-semibold">+€3.205</td>
+                                <td class="p-2 text-right">-</td>
+                            </tr>
+                            <tr class="bg-red-50">
+                                <td class="p-2 font-medium">Enagás</td>
+                                <td class="p-2 text-right">€52.584</td>
+                                <td class="p-2 text-right">€49.380</td>
+                                <td class="p-2 text-right">-</td>
+                                <td class="p-2 text-right text-red-600 font-semibold">-€3.204</td>
+                            </tr>
+                            <tr class="bg-red-50">
+                                <td class="p-2 font-medium">Merlin</td>
+                                <td class="p-2 text-right">€63.527</td>
+                                <td class="p-2 text-right">€61.448</td>
+                                <td class="p-2 text-right">-</td>
+                                <td class="p-2 text-right text-red-600 font-semibold">-€2.079</td>
+                            </tr>
+                            <tr class="bg-red-50">
+                                <td class="p-2 font-medium">Navigator</td>
+                                <td class="p-2 text-right">€63.044</td>
+                                <td class="p-2 text-right">€62.126</td>
+                                <td class="p-2 text-right">-</td>
+                                <td class="p-2 text-right text-red-600 font-semibold">-€918</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="bg-gray-100 font-bold">
+                            <tr>
+                                <td class="p-2">TOTALES</td>
+                                <td class="p-2 text-right">€466.007</td>
+                                <td class="p-2 text-right">€484.164</td>
+                                <td class="p-2 text-right text-green-600">+€24.358</td>
+                                <td class="p-2 text-right text-red-600">-€6.201</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-5 bg-blue-50 rounded-xl">
+                        <h4 class="font-semibold text-blue-800 mb-3">📊 Cálculo del Impuesto (IRPF 2025)</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Plusvalías totales</span>
+                                <span class="font-medium">€24.358</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Minusvalías totales</span>
+                                <span class="font-medium text-red-600">-€6.201</span>
+                            </div>
+                            <div class="flex justify-between border-t pt-2 font-semibold">
+                                <span>PLUSVALÍA NETA</span>
+                                <span>€18.157</span>
+                            </div>
+                            <div class="mt-4 pt-3 border-t">
+                                <div class="flex justify-between text-gray-600">
+                                    <span>Tramo 1 (0-6.000€ × 19%)</span>
+                                    <span>€1.140</span>
+                                </div>
+                                <div class="flex justify-between text-gray-600">
+                                    <span>Tramo 2 (6.001-18.157€ × 21%)</span>
+                                    <span>€2.553</span>
+                                </div>
+                                <div class="flex justify-between font-bold text-blue-800 mt-2 pt-2 border-t">
+                                    <span>IMPUESTO IRPF</span>
+                                    <span>€3.693</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-5 bg-amber-50 rounded-xl">
+                        <h4 class="font-semibold text-amber-800 mb-3">💰 Coste Total de la Operación</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>IRPF sobre plusvalías</span>
+                                <span class="font-medium">€3.693</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Comisiones venta (0,15%)</span>
+                                <span class="font-medium">€728</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Comisiones compra ETFs</span>
+                                <span class="font-medium">€728</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Spread estimado</span>
+                                <span class="font-medium">€250</span>
+                            </div>
+                            <div class="flex justify-between font-bold text-amber-800 mt-3 pt-3 border-t">
+                                <span>COSTE TOTAL</span>
+                                <span>€5.399</span>
+                            </div>
+                            <div class="flex justify-between text-gray-600 mt-2">
+                                <span>% sobre capital</span>
+                                <span class="font-semibold">1,1%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-green-50 rounded-lg">
+                    <h4 class="font-semibold text-green-800 mb-2">✅ Conclusión</h4>
+                    <p class="text-sm text-gray-700">El coste fiscal de €5.399 representa solo el <strong>1,1%</strong> del capital reestructurado. Es un coste razonable para pasar de 8 acciones españolas concentradas a ETFs globales diversificados que generarán ~€15.000/año en dividendos.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: STRATEGY -->
+        <div id="content-strategy" class="hidden">
+            <div class="card p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">🎯 Estrategia de 4 Cubos</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="p-5 bg-purple-50 rounded-xl border-l-4 border-purple-500">
+                        <h3 class="font-semibold text-purple-800 text-lg mb-2">🏦 Cubo RENTAS (35%)</h3>
+                        <p class="text-sm text-gray-600 mb-3">Objetivo: €850.000 | Actual: ~€180.000</p>
+                        <p class="text-sm text-gray-600 mb-4">Genera ~€30.000/año de dividendos</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span>Vanguard All-World High Div</span>
+                                <span class="font-medium">€400.000</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>iShares Global Select Div 100</span>
+                                <span class="font-medium">€300.000</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>Vanguard EUR Govt Bond (Dist)</span>
+                                <span class="font-medium">€150.000</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-5 bg-cyan-50 rounded-xl border-l-4 border-cyan-500">
+                        <h3 class="font-semibold text-cyan-800 text-lg mb-2">🚀 Cubo CRECIMIENTO (44%)</h3>
+                        <p class="text-sm text-gray-600 mb-3">Objetivo: €1.050.000 | Actual: ~€420.000</p>
+                        <p class="text-sm text-gray-600 mb-4">Acumula a largo plazo, no se toca</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span>Vanguard Global Stock (Acc)</span>
+                                <span class="font-medium">€600.000</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>Fundsmith Equity Fund</span>
+                                <span class="font-medium">€200.000</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>Wrappers (RL360 + Utmost)</span>
+                                <span class="font-medium">€250.000</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-5 bg-amber-50 rounded-xl border-l-4 border-amber-500">
+                        <h3 class="font-semibold text-amber-800 text-lg mb-2">🎲 Cubo SATÉLITE (10%)</h3>
+                        <p class="text-sm text-gray-600 mb-3">Objetivo: €240.000 | Actual: ~€364.000</p>
+                        <p class="text-sm text-gray-600 mb-4">Alto riesgo/retorno — REDUCIR</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span>Crypto (BTC, ETH)</span>
+                                <span class="font-medium">€100.000</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>Oro físico (PAXG + ETC)</span>
+                                <span class="font-medium">€80.000</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>ETFs temáticos</span>
+                                <span class="font-medium">€60.000</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-5 bg-green-50 rounded-xl border-l-4 border-green-500">
+                        <h3 class="font-semibold text-green-800 text-lg mb-2">💵 Cubo CASH (10%)</h3>
+                        <p class="text-sm text-gray-600 mb-3">Objetivo: €240.000 | Actual: ~€685.000</p>
+                        <p class="text-sm text-gray-600 mb-4">Reserva + oportunidades — DESPLEGAR</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span>Letras Tesoro 6-12 meses</span>
+                                <span class="font-medium">€150.000</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>Cuenta corriente EUR</span>
+                                <span class="font-medium">€50.000</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span>Stablecoins (USDC)</span>
+                                <span class="font-medium">€40.000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="font-semibold text-gray-800 mb-4">ISINs para comprar en Renta 4</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="font-medium">Vanguard FTSE All-World High Dividend</p>
+                        <p class="text-sm text-gray-500">ISIN: <span class="font-mono bg-white px-2 py-1 rounded">IE00B8GKDB10</span></p>
+                        <p class="text-xs text-purple-600 mt-1">TER 0.29% · Yield ~3.5%</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="font-medium">iShares STOXX Global Select Dividend 100</p>
+                        <p class="text-sm text-gray-500">ISIN: <span class="font-mono bg-white px-2 py-1 rounded">DE000A0F5UH1</span></p>
+                        <p class="text-xs text-purple-600 mt-1">TER 0.46% · Yield ~4.5%</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="font-medium">Vanguard Global Stock Index (Acc)</p>
+                        <p class="text-sm text-gray-500">ISIN: <span class="font-mono bg-white px-2 py-1 rounded">IE00B03HCZ61</span></p>
+                        <p class="text-xs text-cyan-600 mt-1">TER 0.18% · Crecimiento</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <p class="font-medium">Vanguard EUR Government Bond (Dist)</p>
+                        <p class="text-sm text-gray-500">ISIN: <span class="font-mono bg-white px-2 py-1 rounded">IE00BH04GL39</span></p>
+                        <p class="text-xs text-purple-600 mt-1">TER 0.07% · Yield ~2.8%</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 p-4 bg-green-50 rounded-lg">
+                    <h4 class="font-semibold text-green-800 mb-2">💰 Resultado esperado</h4>
+                    <p class="text-sm text-gray-600">Con €850K en Cubo Rentas a yield medio 3.5% = <strong>€29.750/año en dividendos</strong></p>
+                    <p class="text-sm text-gray-600 mt-1">Coste total TER: ~0.30% = €7.200/año (vs €14.000 actual)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: ROADMAP -->
+        <div id="content-roadmap" class="hidden">
+            <div class="space-y-4">
+                <!-- Fase 1 -->
+                <div class="card p-5 border-l-4 border-red-500">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-semibold text-red-700">FASE 1: Vender Acciones Españolas</h3>
+                            <p class="text-sm text-gray-500">Semana 1-2 · €484.164 → ETFs Dividendo</p>
+                        </div>
+                        <span class="badge bg-red-100 text-red-700">URGENTE</span>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-1-1" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Vender IAG (€69.614)</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-1-2" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Vender Sabadell (€66.830)</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-1-3" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Vender Mapfre, Navigator, Merlin, Rovi, Sacyr, Enagás</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-1-4" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Comprar Vanguard All-World High Div (€200.000)</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-1-5" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Comprar iShares Global Select Div 100 (€150.000)</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-1-6" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Comprar Vanguard Global Stock (€100.000)</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-red-600 mt-3">⚠️ Coste fiscal estimado: €5.399 (1,1% del capital)</p>
+                </div>
+
+                <!-- Fase 2 -->
+                <div class="card p-5 border-l-4 border-orange-500">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-semibold text-orange-700">FASE 2: Conversión GBP</h3>
+                            <p class="text-sm text-gray-500">Semanas 2-8 · £445.000 → ~€520.000</p>
+                        </div>
+                        <span class="badge bg-orange-100 text-orange-700">ALTA</span>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-2-1" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Transferir £140K Bankinter → Revolut (tramo 1)</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-2-2" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Configurar alerta GBP/EUR ≥ 1.17 en Revolut</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-2-3" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Convertir y transferir a Renta 4</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-2-4" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Comprar Letras Tesoro 6-12 meses (€150.000)</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-2-5" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Repetir tramos 2 y 3</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Fase 3 -->
+                <div class="card p-5 border-l-4 border-yellow-500">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-semibold text-yellow-700">FASE 3: Reducción Crypto</h3>
+                            <p class="text-sm text-gray-500">Mes 2-3 · De €364K a ~€100K</p>
+                        </div>
+                        <span class="badge bg-yellow-100 text-yellow-700">MEDIA</span>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-3-1" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Convertir USDC €76K → EUR en Kraken</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-3-2" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Convertir EURC €6K → EUR en Bit2Me</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-3-3" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Vender XRP €13K</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-3-4" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Vender 2 BTC (~€160K), mantener 1 BTC</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-3-5" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Transferir EUR a Renta 4 → Ampliar ETFs dividendo</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Fase 4 -->
+                <div class="card p-5 border-l-4 border-green-500">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-semibold text-green-700">FASE 4: Consolidación Oro</h3>
+                            <p class="text-sm text-gray-500">Mes 3</p>
+                        </div>
+                        <span class="badge bg-green-100 text-green-700">BAJA</span>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-4-1" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Comprar €50K Invesco Physical Gold en R4 (IE00B579F325)</span>
+                        </label>
+                        <p class="text-xs text-gray-500 ml-7">Ya tienes €27.653 en Mapfre + €3.810 PAXG → Total objetivo €80K</p>
+                    </div>
+                </div>
+
+                <!-- Fase 5 -->
+                <div class="card p-5 border-l-4 border-gray-400">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-semibold text-gray-700">FASE 5: Revisión Wrappers</h3>
+                            <p class="text-sm text-gray-500">Mes 4+</p>
+                        </div>
+                        <span class="badge bg-gray-100 text-gray-700">CUANDO PUEDAS</span>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-5-1" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Utmost: Solicitar valor rescate (penalización actual ~2,5%)</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-5-2" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">RL360: Evaluar penalización (8 años)</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="task-5-3" onchange="saveProgress()" class="w-4 h-4">
+                            <span class="text-sm">Mapfre Dividendo Europa: Decidir si mantener o rescatar</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: HISTORICO -->
+        <div id="content-historico" class="hidden">
+            <div class="card p-5 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-semibold text-gray-800">📈 Evolución del Patrimonio</h2>
+                    <button onclick="saveSnapshot()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm">
+                        📸 Guardar Snapshot
+                    </button>
+                </div>
+                <canvas id="chartHistorico" height="120"></canvas>
+                <p class="text-xs text-gray-400 mt-3">Guarda un snapshot semanal/mensual para trackear la evolución.</p>
+            </div>
+
+            <div class="card p-5">
+                <h3 class="font-semibold text-gray-800 mb-4">📊 Historial de Snapshots</h3>
+                <div id="snapshotsTable" class="overflow-x-auto">
+                    <p class="text-gray-400 text-sm">No hay snapshots guardados. Haz clic en "Guardar Snapshot" para empezar.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 py-4 px-6 mt-8">
+        <div class="max-w-7xl mx-auto text-center text-sm">
+            <p>Dashboard Patrimonial v5.0 — Datos verificados 18 Diciembre 2025</p>
+            <p class="mt-1">Los datos se guardan localmente en tu navegador</p>
+        </div>
+    </footer>
+
+    <script>
+        // =============================================
+        // INITIALIZATION
+        // =============================================
+        
+        let snapshots = [];
+
+        function init() {
+            loadProgress();
+            loadSnapshots();
+            renderCharts();
+            renderHistorico();
+        }
+
+        // =============================================
+        // CHARTS
+        // =============================================
+
+        function renderCharts() {
+            // Patrimonio Total
+            const ctxPatrimonio = document.getElementById('chartPatrimonio').getContext('2d');
+            new Chart(ctxPatrimonio, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Activos Financieros', 'Inmuebles', 'Arte'],
+                    datasets: [{
+                        data: [2404932, 2233649, 350000],
+                        backgroundColor: ['#3b82f6', '#f59e0b', '#ec4899'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12 } }
+                    },
+                    cutout: '60%'
+                }
+            });
+
+            // Comparativo Actual vs Ideal
+            const ctxComparativo = document.getElementById('chartComparativo').getContext('2d');
+            new Chart(ctxComparativo, {
+                type: 'bar',
+                data: {
+                    labels: ['Rentas', 'Crecimiento', 'Satélite', 'Cash'],
+                    datasets: [
+                        {
+                            label: 'Actual',
+                            data: [180000, 420000, 364095, 1039589],
+                            backgroundColor: '#94a3b8',
+                        },
+                        {
+                            label: 'Ideal',
+                            data: [850000, 1050000, 240000, 240000],
+                            backgroundColor: '#3b82f6',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12 } }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { callback: v => '€' + (v/1000) + 'K' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // =============================================
+        // TABS
+        // =============================================
+
+        function showTab(tabName) {
+            document.querySelectorAll('[id^="content-"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById('content-' + tabName).classList.remove('hidden');
+            document.querySelectorAll('[id^="tab-"]').forEach(el => {
+                el.classList.remove('tab-active');
+                el.classList.add('tab-inactive');
+            });
+            document.getElementById('tab-' + tabName).classList.remove('tab-inactive');
+            document.getElementById('tab-' + tabName).classList.add('tab-active');
+        }
+
+        // =============================================
+        // ROADMAP PROGRESS
+        // =============================================
+
+        function saveProgress() {
+            const progress = {};
+            document.querySelectorAll('[id^="task-"]').forEach(cb => {
+                progress[cb.id] = cb.checked;
+            });
+            localStorage.setItem('patrimonio_progress', JSON.stringify(progress));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('patrimonio_progress');
+            if (saved) {
+                const progress = JSON.parse(saved);
+                Object.entries(progress).forEach(([id, checked]) => {
+                    const cb = document.getElementById(id);
+                    if (cb) cb.checked = checked;
+                });
+            }
+        }
+
+        // =============================================
+        // SNAPSHOTS
+        // =============================================
+
+        function saveSnapshot() {
+            const snapshot = {
+                id: Date.now(),
+                fecha: new Date().toISOString(),
+                patrimonioTotal: 4988581,
+                activosFinancieros: 2404932,
+                inmuebles: 2233649,
+                arte: 350000
+            };
+            
+            snapshots.push(snapshot);
+            localStorage.setItem('patrimonio_snapshots', JSON.stringify(snapshots));
+            renderHistorico();
+            alert('✅ Snapshot guardado: €' + snapshot.patrimonioTotal.toLocaleString('es-ES'));
+        }
+
+        function loadSnapshots() {
+            const saved = localStorage.getItem('patrimonio_snapshots');
+            snapshots = saved ? JSON.parse(saved) : [];
+        }
+
+        function renderHistorico() {
+            const ctx = document.getElementById('chartHistorico');
+            if (!ctx) return;
+
+            if (ctx._chart) ctx._chart.destroy();
+
+            if (snapshots.length === 0) {
+                ctx._chart = new Chart(ctx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Hoy'],
+                        datasets: [{
+                            label: 'Patrimonio',
+                            data: [4988581],
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                ticks: { callback: v => '€' + (v/1000000).toFixed(1) + 'M' }
+                            }
+                        }
+                    }
+                });
+                return;
+            }
+
+            const labels = snapshots.map(s => {
+                const d = new Date(s.fecha);
+                return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+            });
+
+            ctx._chart = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Patrimonio Total',
+                        data: snapshots.map(s => s.patrimonioTotal),
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            ticks: { callback: v => '€' + (v/1000000).toFixed(1) + 'M' }
+                        }
+                    }
+                }
+            });
+
+            // Render table
+            if (snapshots.length > 0) {
+                let html = `
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="text-left p-2">Fecha</th>
+                                <th class="text-right p-2">Patrimonio</th>
+                                <th class="text-right p-2">Financiero</th>
+                                <th class="text-right p-2">Inmuebles</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                `;
+                [...snapshots].reverse().forEach(s => {
+                    const fecha = new Date(s.fecha).toLocaleDateString('es-ES');
+                    html += `
+                        <tr>
+                            <td class="p-2">${fecha}</td>
+                            <td class="p-2 text-right font-medium">€${s.patrimonioTotal.toLocaleString('es-ES')}</td>
+                            <td class="p-2 text-right">€${s.activosFinancieros.toLocaleString('es-ES')}</td>
+                            <td class="p-2 text-right">€${s.inmuebles.toLocaleString('es-ES')}</td>
+                        </tr>
+                    `;
+                });
+                html += '</tbody></table>';
+                document.getElementById('snapshotsTable').innerHTML = html;
+            }
+        }
+
+        // =============================================
+        // EXPORT/IMPORT
+        // =============================================
+
+        function exportData() {
+            const data = {
+                snapshots: snapshots,
+                progress: JSON.parse(localStorage.getItem('patrimonio_progress') || '{}'),
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `patrimonio_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

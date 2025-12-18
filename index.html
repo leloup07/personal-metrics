@@ -184,7 +184,7 @@
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-lg font-bold text-amber-700">€461.006</p>
+                                <p class="text-lg font-bold text-amber-700">€379.101</p>
                                 <p class="text-xs text-gray-500">de €240.000</p>
                             </div>
                         </div>
@@ -192,10 +192,10 @@
                             <div class="bg-amber-600 h-4 rounded-full transition-all duration-500" style="width: 100%"></div>
                         </div>
                         <div class="flex justify-between text-xs">
-                            <span class="text-red-600 font-medium">⚠️ 192% — REDUCIR</span>
-                            <span class="text-gray-500">Exceso €221.006</span>
+                            <span class="text-red-600 font-medium">⚠️ 158% — REDUCIR</span>
+                            <span class="text-gray-500">Exceso €139.101</span>
                         </div>
-                        <p class="text-xs text-amber-700 mt-2">₿ Crypto €364K + ETFs temáticos €97K</p>
+                        <p class="text-xs text-amber-700 mt-2">₿ BTC €263K + ETFs temáticos €97K + Otros crypto €19K</p>
                     </div>
                     
                     <!-- Cubo CASH -->
@@ -209,7 +209,7 @@
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="text-lg font-bold text-green-700">€712.816</p>
+                                <p class="text-lg font-bold text-green-700">€794.721</p>
                                 <p class="text-xs text-gray-500">de €240.000</p>
                             </div>
                         </div>
@@ -217,10 +217,10 @@
                             <div class="bg-green-600 h-4 rounded-full transition-all duration-500" style="width: 100%"></div>
                         </div>
                         <div class="flex justify-between text-xs">
-                            <span class="text-red-600 font-medium">⚠️ 297% — DESPLEGAR</span>
-                            <span class="text-gray-500">Exceso €472.816</span>
+                            <span class="text-red-600 font-medium">⚠️ 331% — DESPLEGAR</span>
+                            <span class="text-gray-500">Exceso €554.721</span>
                         </div>
-                        <p class="text-xs text-green-700 mt-2">💷 £445K GBP sin rendimiento + EUR varias cuentas</p>
+                        <p class="text-xs text-green-700 mt-2">💷 GBP €521K + Stablecoins €82K + EUR/USD €192K</p>
                     </div>
                 </div>
                 
@@ -242,18 +242,52 @@
                 </div>
             </section>
 
-            <!-- Gráficos -->
+            <!-- Gráficos de Composición por Cubo -->
+            <section class="card p-5 mb-6">
+                <h2 class="font-semibold text-gray-800 mb-4">📊 Composición por Tipo de Activo</h2>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Cubo RENTAS -->
+                    <div class="text-center">
+                        <h3 class="text-sm font-semibold text-purple-700 mb-2">🏦 RENTAS — €43.359</h3>
+                        <canvas id="chartRentas" width="160" height="160"></canvas>
+                    </div>
+                    <!-- Cubo CRECIMIENTO -->
+                    <div class="text-center">
+                        <h3 class="text-sm font-semibold text-cyan-700 mb-2">🚀 CRECIMIENTO — €570.698</h3>
+                        <canvas id="chartCrecimiento" width="160" height="160"></canvas>
+                    </div>
+                    <!-- Cubo SATÉLITE -->
+                    <div class="text-center">
+                        <h3 class="text-sm font-semibold text-amber-700 mb-2">🎲 SATÉLITE — €461.006</h3>
+                        <canvas id="chartSatelite" width="160" height="160"></canvas>
+                    </div>
+                    <!-- Cubo CASH -->
+                    <div class="text-center">
+                        <h3 class="text-sm font-semibold text-green-700 mb-2">💵 CASH — €712.816</h3>
+                        <canvas id="chartCash" width="160" height="160"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Comparativa Actual vs Ideal -->
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
                 <div class="card p-5">
-                    <h2 class="font-semibold text-gray-800 mb-4">Distribución Patrimonio Total</h2>
-                    <div class="flex items-center justify-center">
-                        <canvas id="chartPatrimonio" width="280" height="280"></canvas>
+                    <h2 class="font-semibold text-gray-800 mb-4">Distribución Actual vs Ideal</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center">
+                            <p class="text-xs text-gray-500 mb-2">ACTUAL</p>
+                            <canvas id="chartActual" width="140" height="140"></canvas>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-500 mb-2">IDEAL</p>
+                            <canvas id="chartIdeal" width="140" height="140"></canvas>
+                        </div>
                     </div>
                 </div>
                 <div class="card p-5">
-                    <h2 class="font-semibold text-gray-800 mb-4">Inicial vs Actual vs Ideal</h2>
+                    <h2 class="font-semibold text-gray-800 mb-4">Progreso por Cubo</h2>
                     <div class="flex items-center justify-center">
-                        <canvas id="chartComparativo" width="400" height="280"></canvas>
+                        <canvas id="chartComparativo" width="320" height="200"></canvas>
                     </div>
                 </div>
             </section>
@@ -283,6 +317,15 @@
 
         <!-- TAB: PLATFORMS -->
         <div id="content-platforms" class="hidden">
+            <!-- Leyenda de cubos -->
+            <div class="mb-4 p-3 bg-gray-100 rounded-lg flex flex-wrap gap-4 text-sm">
+                <span class="font-medium text-gray-600">Leyenda:</span>
+                <span class="flex items-center"><span class="w-3 h-3 bg-purple-500 rounded mr-1"></span> 🏦 RENTAS</span>
+                <span class="flex items-center"><span class="w-3 h-3 bg-cyan-500 rounded mr-1"></span> 🚀 CRECIMIENTO</span>
+                <span class="flex items-center"><span class="w-3 h-3 bg-amber-500 rounded mr-1"></span> 🎲 SATÉLITE</span>
+                <span class="flex items-center"><span class="w-3 h-3 bg-green-500 rounded mr-1"></span> 💵 CASH</span>
+                <span class="flex items-center"><span class="w-3 h-3 bg-red-400 rounded mr-1"></span> ⚠️ A VENDER</span>
+            </div>
             <div class="space-y-4">
                 
                 <!-- Renta 4 -->
@@ -295,29 +338,30 @@
                         <p class="text-2xl font-bold text-blue-600">€625.514</p>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
-                        <div class="p-3 bg-gray-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Bolsa Nacional</p>
+                        <div class="p-3 bg-red-50 rounded-lg border-l-4 border-red-400">
+                            <p class="text-xs text-red-600">⚠️ Bolsa Nacional</p>
                             <p class="font-semibold">€488.002</p>
+                            <p class="text-xs text-gray-400">A vender</p>
                         </div>
-                        <div class="p-3 bg-purple-50 rounded-lg">
-                            <p class="text-xs text-purple-600">VHYL (Rentas)</p>
+                        <div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                            <p class="text-xs text-purple-700">🏦 VHYL</p>
                             <p class="font-semibold">€6.889</p>
+                            <p class="text-xs text-gray-400">ETF Div Global</p>
                         </div>
-                        <div class="p-3 bg-gray-50 rounded-lg">
-                            <p class="text-xs text-gray-500">ETFs Satélite</p>
+                        <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+                            <p class="text-xs text-amber-700">🎲 ETFs Satélite</p>
                             <p class="font-semibold">€96.911</p>
+                            <p class="text-xs text-gray-400">Nasdaq, Semi, India...</p>
                         </div>
-                        <div class="p-3 bg-gray-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Fondos</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Fondos</p>
                             <p class="font-semibold">€5.946</p>
+                            <p class="text-xs text-gray-400">Japón, Europa</p>
                         </div>
-                        <div class="p-3 bg-gray-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Cash EUR</p>
+                        <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <p class="text-xs text-green-700">💵 Cash EUR</p>
                             <p class="font-semibold">€27.766</p>
-                        </div>
-                        <div class="p-3 bg-red-50 rounded-lg">
-                            <p class="text-xs text-red-600">A vender</p>
-                            <p class="font-semibold text-red-700">€488.002</p>
+                            <p class="text-xs text-gray-400">Disponible</p>
                         </div>
                     </div>
                 </div>
@@ -335,29 +379,35 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        <div class="p-3 bg-purple-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Aegon High Yield Bond</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Aegon High Yield Bond</p>
                             <p class="font-semibold">€39.456</p>
+                            <p class="text-xs text-gray-400">RF High Yield</p>
                         </div>
-                        <div class="p-3 bg-purple-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Janus Henderson Global</p>
-                            <p class="font-semibold">€183.590</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Janus Henderson Global</p>
+                            <p class="font-semibold">€61.184</p>
+                            <p class="text-xs text-gray-400">RV Global</p>
                         </div>
-                        <div class="p-3 bg-purple-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Vanguard Small Cap</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Vanguard Small Cap</p>
                             <p class="font-semibold">€26.981</p>
+                            <p class="text-xs text-gray-400">RV Small Cap</p>
                         </div>
-                        <div class="p-3 bg-purple-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Vanguard LifeStrategy 80</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Vanguard LifeStrategy 80</p>
                             <p class="font-semibold">€54.525</p>
+                            <p class="text-xs text-gray-400">Mixto 80/20</p>
                         </div>
-                        <div class="p-3 bg-purple-50 rounded-lg">
-                            <p class="text-xs text-gray-500">iShares EuroStoxx 50</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 iShares EuroStoxx 50</p>
                             <p class="font-semibold">€48.430</p>
+                            <p class="text-xs text-gray-400">RV Europa</p>
                         </div>
-                        <div class="p-3 bg-purple-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Cash interno</p>
+                        <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <p class="text-xs text-green-700">💵 Cash interno</p>
                             <p class="font-semibold">€4.195</p>
+                            <p class="text-xs text-gray-400">Cash</p>
                         </div>
                     </div>
                 </div>
@@ -375,33 +425,40 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div class="p-3 bg-indigo-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Fidelity Global Tech</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Fidelity Global Tech</p>
                             <p class="font-semibold">€80.696</p>
+                            <p class="text-xs text-gray-400">RV Tecnología</p>
                         </div>
-                        <div class="p-3 bg-indigo-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Ninety One Global Str</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Ninety One Global Str</p>
                             <p class="font-semibold">€51.210</p>
+                            <p class="text-xs text-gray-400">RV Global</p>
                         </div>
-                        <div class="p-3 bg-indigo-50 rounded-lg">
-                            <p class="text-xs text-gray-500">JPM Eur Strategic Grwt</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 JPM Eur Strategic Grwt</p>
                             <p class="font-semibold">€29.387</p>
+                            <p class="text-xs text-gray-400">RV Europa</p>
                         </div>
-                        <div class="p-3 bg-indigo-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Pictet Global Megatrend</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Pictet Global Megatrend</p>
                             <p class="font-semibold">€22.495</p>
+                            <p class="text-xs text-gray-400">RV Temático</p>
                         </div>
-                        <div class="p-3 bg-indigo-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Fidelity Euro Bond</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Fidelity Euro Bond</p>
                             <p class="font-semibold">€17.765</p>
+                            <p class="text-xs text-gray-400">RF Euro</p>
                         </div>
-                        <div class="p-3 bg-indigo-50 rounded-lg">
-                            <p class="text-xs text-gray-500">BGF Emerging Markets</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 BGF Emerging Markets</p>
                             <p class="font-semibold">€16.325</p>
+                            <p class="text-xs text-gray-400">RV Emergentes</p>
                         </div>
-                        <div class="p-3 bg-indigo-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Jupiter India Select</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Jupiter India Select</p>
                             <p class="font-semibold">€14.701</p>
+                            <p class="text-xs text-gray-400">RV India</p>
                         </div>
                     </div>
                 </div>
@@ -416,21 +473,25 @@
                         <p class="text-2xl font-bold text-red-600">€188.138</p>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div class="p-3 bg-red-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Fondos inversión</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Fondos inversión</p>
                             <p class="font-semibold">€53.565</p>
+                            <p class="text-xs text-gray-400">RV Mixta</p>
                         </div>
-                        <div class="p-3 bg-red-50 rounded-lg">
-                            <p class="text-xs text-gray-500">ETFs (Defense + Gold)</p>
+                        <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+                            <p class="text-xs text-amber-700">🎲 ETFs Defense + Gold</p>
                             <p class="font-semibold">€57.413</p>
+                            <p class="text-xs text-gray-400">Temáticos</p>
                         </div>
-                        <div class="p-3 bg-red-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Dividendo Europa</p>
+                        <div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                            <p class="text-xs text-purple-700">🏦 Dividendo Europa</p>
                             <p class="font-semibold">€36.470</p>
+                            <p class="text-xs text-gray-400">Fondo Div</p>
                         </div>
-                        <div class="p-3 bg-red-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Plan Pensiones Renta</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Plan Pensiones Renta</p>
                             <p class="font-semibold">€37.765</p>
+                            <p class="text-xs text-gray-400">RF + Mixto</p>
                         </div>
                     </div>
                 </div>
@@ -445,13 +506,15 @@
                         <p class="text-2xl font-bold text-orange-500">€81.675</p>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 bg-orange-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Plan Renta Fija Europea</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Plan Renta Fija Europea</p>
                             <p class="font-semibold">€67.731</p>
+                            <p class="text-xs text-gray-400">RF Euro</p>
                         </div>
-                        <div class="p-3 bg-orange-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Plan S&P 500</p>
+                        <div class="p-3 bg-cyan-50 rounded-lg border-l-4 border-cyan-500">
+                            <p class="text-xs text-cyan-700">🚀 Plan S&P 500</p>
                             <p class="font-semibold">€13.932</p>
+                            <p class="text-xs text-gray-400">RV USA</p>
                         </div>
                     </div>
                 </div>
@@ -466,25 +529,30 @@
                         <p class="text-2xl font-bold text-green-600">€685.050</p>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                        <div class="p-3 bg-green-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Bankinter GBP (£420K)</p>
+                        <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <p class="text-xs text-green-700">💵 Bankinter GBP</p>
                             <p class="font-semibold">€491.400</p>
+                            <p class="text-xs text-gray-400">£420K</p>
                         </div>
-                        <div class="p-3 bg-green-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Bankinter GBP (£25K)</p>
+                        <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <p class="text-xs text-green-700">💵 Bankinter GBP</p>
                             <p class="font-semibold">€29.250</p>
+                            <p class="text-xs text-gray-400">£25K</p>
                         </div>
-                        <div class="p-3 bg-green-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Openbank USD ($75K)</p>
+                        <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <p class="text-xs text-green-700">💵 Openbank USD</p>
                             <p class="font-semibold">€71.400</p>
+                            <p class="text-xs text-gray-400">$75K</p>
                         </div>
-                        <div class="p-3 bg-green-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Revolut EUR</p>
+                        <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <p class="text-xs text-green-700">💵 Revolut EUR</p>
                             <p class="font-semibold">€60.000</p>
+                            <p class="text-xs text-gray-400">EUR</p>
                         </div>
-                        <div class="p-3 bg-green-50 rounded-lg">
-                            <p class="text-xs text-gray-500">Rand EUR</p>
+                        <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <p class="text-xs text-green-700">💵 Rand EUR</p>
                             <p class="font-semibold">€33.000</p>
+                            <p class="text-xs text-gray-400">EUR</p>
                         </div>
                     </div>
                 </div>
@@ -499,29 +567,35 @@
                         <p class="text-2xl font-bold text-amber-500">€364.095</p>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div class="p-3 bg-amber-50 rounded-lg">
-                            <p class="text-xs text-gray-500">BTC (3,22 total)</p>
+                        <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+                            <p class="text-xs text-amber-700">🎲 BTC</p>
                             <p class="font-semibold">€263.045</p>
+                            <p class="text-xs text-gray-400">3,22 BTC</p>
                         </div>
-                        <div class="p-3 bg-amber-50 rounded-lg">
-                            <p class="text-xs text-gray-500">USDC (79.700)</p>
+                        <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <p class="text-xs text-green-700">💵 USDC</p>
                             <p class="font-semibold">€75.905</p>
+                            <p class="text-xs text-gray-400">Cash digital</p>
                         </div>
-                        <div class="p-3 bg-amber-50 rounded-lg">
-                            <p class="text-xs text-gray-500">XRP (7.270)</p>
+                        <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+                            <p class="text-xs text-amber-700">🎲 XRP</p>
                             <p class="font-semibold">€12.860</p>
+                            <p class="text-xs text-gray-400">7.270 XRP</p>
                         </div>
-                        <div class="p-3 bg-amber-50 rounded-lg">
-                            <p class="text-xs text-gray-500">EURC Bit2Me</p>
+                        <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                            <p class="text-xs text-green-700">💵 EURC</p>
                             <p class="font-semibold">€6.000</p>
+                            <p class="text-xs text-gray-400">Cash digital</p>
                         </div>
-                        <div class="p-3 bg-amber-50 rounded-lg">
-                            <p class="text-xs text-gray-500">PAXG (0,99)</p>
+                        <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+                            <p class="text-xs text-amber-700">🎲 PAXG</p>
                             <p class="font-semibold">€3.810</p>
+                            <p class="text-xs text-gray-400">Oro tokenizado</p>
                         </div>
-                        <div class="p-3 bg-amber-50 rounded-lg">
-                            <p class="text-xs text-gray-500">ETH (1,0)</p>
+                        <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-500">
+                            <p class="text-xs text-amber-700">🎲 ETH</p>
                             <p class="font-semibold">€2.475</p>
+                            <p class="text-xs text-gray-400">1,0 ETH</p>
                         </div>
                     </div>
                 </div>
@@ -1200,63 +1274,189 @@
         // =============================================
 
         function renderCharts() {
-            // Patrimonio Total
-            const ctxPatrimonio = document.getElementById('chartPatrimonio').getContext('2d');
-            new Chart(ctxPatrimonio, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Activos Financieros', 'Inmuebles', 'Arte'],
-                    datasets: [{
-                        data: [2404932, 2233649, 350000],
-                        backgroundColor: ['#3b82f6', '#f59e0b', '#ec4899'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12 } }
+            // Cubo RENTAS - Composición
+            const ctxRentas = document.getElementById('chartRentas');
+            if (ctxRentas) {
+                new Chart(ctxRentas.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['ETF Div Global €7K', 'Fondo Div Europa €36K'],
+                        datasets: [{
+                            data: [6889, 36470],
+                            backgroundColor: ['#8b5cf6', '#a78bfa'],
+                            borderWidth: 0
+                        }]
                     },
-                    cutout: '60%'
-                }
-            });
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        cutout: '50%'
+                    }
+                });
+            }
 
-            // Comparativo Inicial vs Actual vs Ideal
-            const ctxComparativo = document.getElementById('chartComparativo').getContext('2d');
-            new Chart(ctxComparativo, {
-                type: 'bar',
-                data: {
-                    labels: ['Rentas', 'Crecimiento', 'Satélite', 'Cash'],
-                    datasets: [
-                        {
-                            label: 'Inicial (18-dic-25)',
-                            data: [36470, 570698, 461006, 712816],
-                            backgroundColor: '#94a3b8',
-                        },
-                        {
-                            label: 'Actual',
-                            data: [43359, 570698, 461006, 705927],
-                            backgroundColor: '#f97316',
-                        },
-                        {
-                            label: 'Ideal',
-                            data: [850000, 1050000, 240000, 240000],
-                            backgroundColor: '#3b82f6',
-                        }
-                    ]
-                },
-                options: {
-                    responsive: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12 } }
+            // Cubo CRECIMIENTO - Composición
+            const ctxCrecimiento = document.getElementById('chartCrecimiento');
+            if (ctxCrecimiento) {
+                new Chart(ctxCrecimiento.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['RV Global €112K', 'RV Europa €78K', 'RV Tecnología €81K', 'RV Emergentes €31K', 'RV Small Cap €27K', 'RF Euro €18K', 'RF High Yield €39K', 'Mixto 80/20 €55K', 'RV Temático €22K', 'Pensiones €119K'],
+                        datasets: [{
+                            data: [112394, 77817, 80696, 31026, 26981, 17765, 39456, 54525, 22495, 119428],
+                            backgroundColor: ['#06b6d4', '#0891b2', '#0e7490', '#155e75', '#164e63', '#67e8f9', '#a5f3fc', '#22d3ee', '#0d9488', '#14b8a6'],
+                            borderWidth: 0
+                        }]
                     },
-                    scales: {
-                        y: {
-                            ticks: { callback: v => '€' + (v/1000) + 'K' }
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        cutout: '50%'
+                    }
+                });
+            }
+
+            // Cubo SATÉLITE - Composición
+            const ctxSatelite = document.getElementById('chartSatelite');
+            if (ctxSatelite) {
+                new Chart(ctxSatelite.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['BTC €263K', 'ETF Blockchain €28K', 'ETF Semis €27K', 'ETF Nasdaq €24K', 'ETF India €17K', 'Otros crypto €19K'],
+                        datasets: [{
+                            data: [263045, 28329, 26845, 24265, 17472, 19145],
+                            backgroundColor: ['#f59e0b', '#fbbf24', '#fcd34d', '#fde68a', '#fef3c7', '#d97706'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        cutout: '50%'
+                    }
+                });
+            }
+
+            // Cubo CASH - Composición
+            const ctxCash = document.getElementById('chartCash');
+            if (ctxCash) {
+                new Chart(ctxCash.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['GBP €521K', 'Stablecoins €82K', 'USD €71K', 'EUR €94K', 'Cash R4 €28K'],
+                        datasets: [{
+                            data: [520650, 81905, 71400, 93000, 27766],
+                            backgroundColor: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        cutout: '50%'
+                    }
+                });
+            }
+
+            // Donut: Distribución Actual
+            const ctxActual = document.getElementById('chartActual');
+            if (ctxActual) {
+                new Chart(ctxActual.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Rentas 2%', 'Crecimiento 32%', 'Satélite 21%', 'Cash 45%'],
+                        datasets: [{
+                            data: [43359, 570698, 379101, 794721],
+                            backgroundColor: ['#8b5cf6', '#06b6d4', '#f59e0b', '#10b981'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 9 } } }
+                        },
+                        cutout: '55%'
+                    }
+                });
+            }
+
+            // Donut: Distribución Ideal
+            const ctxIdeal = document.getElementById('chartIdeal');
+            if (ctxIdeal) {
+                new Chart(ctxIdeal.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Rentas 35%', 'Crecimiento 44%', 'Satélite 10%', 'Cash 10%'],
+                        datasets: [{
+                            data: [850000, 1050000, 240000, 240000],
+                            backgroundColor: ['#8b5cf6', '#06b6d4', '#f59e0b', '#10b981'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 9 } } }
+                        },
+                        cutout: '55%'
+                    }
+                });
+            }
+
+            // Barras: Progreso por Cubo
+            const ctxComparativo = document.getElementById('chartComparativo');
+            if (ctxComparativo) {
+                new Chart(ctxComparativo.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Rentas', 'Crecimiento', 'Satélite', 'Cash'],
+                        datasets: [
+                            {
+                                label: 'Inicial',
+                                data: [36470, 570698, 379101, 794721],
+                                backgroundColor: '#94a3b8',
+                            },
+                            {
+                                label: 'Actual',
+                                data: [43359, 570698, 379101, 787832],
+                                backgroundColor: '#f97316',
+                            },
+                            {
+                                label: 'Ideal',
+                                data: [850000, 1050000, 240000, 240000],
+                                backgroundColor: '#3b82f6',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { 
+                                    callback: v => '€' + (v/1000) + 'K',
+                                    font: { size: 8 }
+                                }
+                            },
+                            y: {
+                                ticks: { font: { size: 9 } }
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
 
         // =============================================

@@ -1,5 +1,818 @@
-cd ~/Desktop/personal-metrics
-pbpaste > index.html
-git add index.html
-git commit -m "Fix: Dashboard patrimonial"
-git push --force
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gobierno Patrimonial — Dashboard Ejecutivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-header { background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); }
+        .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .positive { color: #10b981; }
+        .negative { color: #ef4444; }
+        .neutral { color: #6b7280; }
+        .badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+        .badge-l0 { background: #dcfce7; color: #166534; }
+        .badge-l1 { background: #dbeafe; color: #1e40af; }
+        .badge-l2 { background: #fef3c7; color: #92400e; }
+        .badge-l3 { background: #fee2e2; color: #991b1b; }
+        .progress-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-header text-white py-6 px-8">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="text-2xl font-semibold">Gobierno Patrimonial — Dashboard Ejecutivo</h1>
+            <p class="text-blue-200 mt-1">Actualizado: Diciembre 2024 | Versión post-reestructuración propuesta</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-8 py-8">
+        
+        <!-- KPIs principales -->
+        <section class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+            <div class="card p-5">
+                <p class="text-sm text-gray-500 mb-1">Patrimonio Total</p>
+                <p class="text-2xl font-bold text-gray-900">4.734.851 €</p>
+                <p class="text-xs text-gray-400 mt-1">Con ajuste conservador -15% en inmuebles</p>
+            </div>
+            <div class="card p-5">
+                <p class="text-sm text-gray-500 mb-1">Líquido (L0+L1)</p>
+                <p class="text-2xl font-bold text-green-600">1.490.358 €</p>
+                <p class="text-xs text-gray-400 mt-1">31.5% del patrimonio</p>
+            </div>
+            <div class="card p-5">
+                <p class="text-sm text-gray-500 mb-1">Ilíquido (L2+L3)</p>
+                <p class="text-2xl font-bold text-amber-600">3.244.493 €</p>
+                <p class="text-xs text-gray-400 mt-1">68.5% del patrimonio</p>
+            </div>
+            <div class="card p-5">
+                <p class="text-sm text-gray-500 mb-1">Coste Actual Cartera</p>
+                <p class="text-2xl font-bold text-red-500">~1.2%</p>
+                <p class="text-xs text-gray-400 mt-1">~14.000 €/año en comisiones</p>
+            </div>
+            <div class="card p-5">
+                <p class="text-sm text-gray-500 mb-1">Coste Objetivo</p>
+                <p class="text-2xl font-bold text-green-600">~0.25%</p>
+                <p class="text-xs text-gray-400 mt-1">~3.000 €/año en comisiones</p>
+            </div>
+        </section>
+
+        <!-- Gráficos de asignación -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="card p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">📍 Asignación Actual</h2>
+                <div class="flex items-center justify-center">
+                    <canvas id="chartActual" width="280" height="280"></canvas>
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-amber-500 mr-2"></span>Inmobiliario: 47.2%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>Cash: 12.6%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>RV España: 7.0%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-purple-500 mr-2"></span>ETFs temáticos: 2.8%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-indigo-500 mr-2"></span>Fondos wrappers: 5.5%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-pink-500 mr-2"></span>Arte: 7.4%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-orange-500 mr-2"></span>Crypto: 6.3%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>Oro: 0.6%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-gray-500 mr-2"></span>Pensiones: 0.8%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-red-400 mr-2"></span>GBP pendiente: 10.1%</div>
+                </div>
+            </div>
+            
+            <div class="card p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">🎯 Asignación Objetivo</h2>
+                <div class="flex items-center justify-center">
+                    <canvas id="chartObjetivo" width="280" height="280"></canvas>
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-amber-500 mr-2"></span>Inmobiliario: 47.2%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>Cash/Letras: 4.2%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-teal-500 mr-2"></span>RF Euro: 10.3%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-600 mr-2"></span>RV Global: 15.8%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-400 mr-2"></span>RV España (selectivo): 2.7%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-purple-500 mr-2"></span>ETFs temáticos: 2.8%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-indigo-500 mr-2"></span>Fondos wrappers: 5.5%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-pink-500 mr-2"></span>Arte: 7.4%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-orange-500 mr-2"></span>Crypto: 2.1%</div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-yellow-600 mr-2"></span>Oro: 2.1%</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GAP Analysis -->
+        <section class="card p-6 mb-8">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">📊 Análisis de GAP — Acciones Requeridas</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-medium text-red-600 mb-3">➖ Reducir / Vender</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                            <span class="text-sm">Crypto (BTC + XRP)</span>
+                            <span class="font-semibold text-red-600">-200.000 €</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                            <span class="text-sm">Acciones españolas (Sabadell, Mapfre, Rovi, Sacyr, Enagás, Navigator, Repsol)</span>
+                            <span class="font-semibold text-red-600">-200.000 €</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                            <span class="text-sm">USDC → EUR</span>
+                            <span class="font-semibold text-red-600">-75.000 €</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
+                            <span class="text-sm">GBP → EUR (conversión vía Revolut)</span>
+                            <span class="font-semibold text-amber-600">~490.000 €</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-medium text-green-600 mb-3">➕ Incrementar / Comprar</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-sm">RF Euro (Vanguard Euro Govt Bond)</span>
+                            <span class="font-semibold text-green-600">+490.000 €</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-sm">RV Global (Vanguard Global Stock)</span>
+                            <span class="font-semibold text-green-600">+350.000 €</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-sm">RV Quality (Fundsmith)</span>
+                            <span class="font-semibold text-green-600">+100.000 €</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-sm">Oro (Invesco Physical Gold vía R4)</span>
+                            <span class="font-semibold text-green-600">+72.000 €</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-sm">Letras del Tesoro</span>
+                            <span class="font-semibold text-green-600">+100.000 €</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Roadmap de ejecución -->
+        <section class="card p-6 mb-8">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">🧭 Roadmap de Ejecución</h2>
+            
+            <div class="space-y-6">
+                <!-- Fase 1 -->
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-semibold text-blue-700">FASE 1: Conversión GBP (Semanas 1-6)</h3>
+                        <span class="badge bg-blue-100 text-blue-700">PRIORIDAD ALTA</span>
+                    </div>
+                    <div class="mt-3 space-y-2 text-sm text-gray-600">
+                        <div class="flex items-start">
+                            <span class="text-blue-500 mr-2">1.</span>
+                            <div>
+                                <strong>Semana 1:</strong> Transferir £140K de Bankinter GBP → Revolut. Convertir a EUR cuando GBP/EUR ≥ 1.17. Transferir ~€165K a Renta 4.
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-blue-500 mr-2">2.</span>
+                            <div>
+                                <strong>Semana 2-3:</strong> Comprar €165K en Vanguard Euro Government Bond (IE00BH04GL39) en R4.
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-blue-500 mr-2">3.</span>
+                            <div>
+                                <strong>Semana 3-4:</strong> Repetir con segundo tramo £140K → ~€165K → Vanguard Euro Govt Bond.
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-blue-500 mr-2">4.</span>
+                            <div>
+                                <strong>Semana 5-6:</strong> Tercer tramo £140K → ~€165K → Vanguard Euro Govt Bond. Total RF: ~€490K.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fase 2 -->
+                <div class="border-l-4 border-orange-500 pl-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-semibold text-orange-700">FASE 2: Reducción Crypto (Mes 2)</h3>
+                        <span class="badge bg-orange-100 text-orange-700">PRIORIDAD ALTA</span>
+                    </div>
+                    <div class="mt-3 space-y-2 text-sm text-gray-600">
+                        <div class="flex items-start">
+                            <span class="text-orange-500 mr-2">1.</span>
+                            <div>
+                                <strong>USDC €75K:</strong> Convertir a EUR inmediatamente (no rinde nada). Transferir a R4.
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-orange-500 mr-2">2.</span>
+                            <div>
+                                <strong>XRP €15K:</strong> Vender todo. Activo especulativo sin fundamentales claros.
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-orange-500 mr-2">3.</span>
+                            <div>
+                                <strong>BTC (3 unidades ~€285K):</strong> Vender 1.5-2 BTC (~€140-190K). Mantener 1-1.5 BTC como posición especulativa/oro digital.
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-orange-500 mr-2">4.</span>
+                            <div>
+                                <strong>Destino fondos:</strong> €100K a Vanguard Global Stock + €100K a Letras del Tesoro.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fase 3 -->
+                <div class="border-l-4 border-purple-500 pl-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-semibold text-purple-700">FASE 3: Simplificación Acciones España (Mes 2-3)</h3>
+                        <span class="badge bg-purple-100 text-purple-700">PRIORIDAD MEDIA</span>
+                    </div>
+                    <div class="mt-3 text-sm text-gray-600">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="font-medium text-red-600 mb-2">Vender (total ~€200K):</p>
+                                <ul class="space-y-1">
+                                    <li>• Sabadell: €68.300</li>
+                                    <li>• Mapfre: €65.175</li>
+                                    <li>• Rovi: €56.768</li>
+                                    <li>• Sacyr: €52.823</li>
+                                    <li>• Enagás: €49.380</li>
+                                    <li>• Navigator: €62.126</li>
+                                    <li>• Repsol: €3.798</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <p class="font-medium text-green-600 mb-2">Mantener (~€130K):</p>
+                                <ul class="space-y-1">
+                                    <li>• Airbus: €69.614 (calidad europea)</li>
+                                    <li>• Merlin: €61.448 (inmobiliario cotizado)</li>
+                                </ul>
+                                <p class="font-medium text-green-600 mt-4 mb-2">Destino €200K:</p>
+                                <ul class="space-y-1">
+                                    <li>• €150K → Vanguard Global Stock</li>
+                                    <li>• €50K → Fundsmith</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fase 4 -->
+                <div class="border-l-4 border-yellow-500 pl-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-semibold text-yellow-700">FASE 4: Incremento Oro (Mes 3)</h3>
+                        <span class="badge bg-yellow-100 text-yellow-700">PRIORIDAD MEDIA</span>
+                    </div>
+                    <div class="mt-3 space-y-2 text-sm text-gray-600">
+                        <div class="flex items-start">
+                            <span class="text-yellow-600 mr-2">1.</span>
+                            <div>
+                                Comprar €72K adicionales en <strong>Invesco Physical Gold ETC (IE00B579F325)</strong> directamente en Renta 4.
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-yellow-600 mr-2">2.</span>
+                            <div>
+                                <strong>Importante:</strong> NO a través de Mapfre unit-linked. Compra directa en R4 = 0% coste adicional.
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-yellow-600 mr-2">3.</span>
+                            <div>
+                                Oro total objetivo: ~€100K (2.1% del patrimonio).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fase 5 -->
+                <div class="border-l-4 border-gray-400 pl-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-semibold text-gray-700">FASE 5: Revisión Wrappers (Mes 4+)</h3>
+                        <span class="badge bg-gray-100 text-gray-700">PRIORIDAD BAJA</span>
+                    </div>
+                    <div class="mt-3 space-y-2 text-sm text-gray-600">
+                        <div class="flex items-start">
+                            <span class="text-gray-500 mr-2">1.</span>
+                            <div>
+                                <strong>Utmost (desde 2013, 12 años):</strong> Solicitar valor de rescate sin penalización. Probablemente ya libre. Si es así, rescatar y consolidar en R4.
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-gray-500 mr-2">2.</span>
+                            <div>
+                                <strong>RL360 (desde 2017, 8 años):</strong> Consultar penalización residual. Si &lt;2%, puede merecer rescatar. Si &gt;3%, esperar 1-2 años más.
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-gray-500 mr-2">3.</span>
+                            <div>
+                                <strong>Mapfre:</strong> Mantener temporalmente. Evaluar cuando decidas sobre la relación comercial global con ellos.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inventario completo -->
+        <section class="card p-6 mb-8">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">📋 Inventario por Activo — Estado Post-Reestructuración</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="text-left p-3 font-medium">Activo</th>
+                            <th class="text-left p-3 font-medium">Categoría</th>
+                            <th class="text-left p-3 font-medium">Liquidez</th>
+                            <th class="text-right p-3 font-medium">Importe Actual</th>
+                            <th class="text-right p-3 font-medium">Importe Objetivo</th>
+                            <th class="text-left p-3 font-medium">Plataforma</th>
+                            <th class="text-left p-3 font-medium">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <!-- Inmobiliario -->
+                        <tr class="bg-amber-50">
+                            <td class="p-3 font-medium">Inmueble Madrid</td>
+                            <td class="p-3">Inmobiliario</td>
+                            <td class="p-3"><span class="badge badge-l3">L3</span></td>
+                            <td class="p-3 text-right">1.149.647 €</td>
+                            <td class="p-3 text-right">1.149.647 €</td>
+                            <td class="p-3">Directo</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                        <tr class="bg-amber-50">
+                            <td class="p-3 font-medium">Inmueble Sitges</td>
+                            <td class="p-3">Inmobiliario</td>
+                            <td class="p-3"><span class="badge badge-l3">L3</span></td>
+                            <td class="p-3 text-right">625.930 €</td>
+                            <td class="p-3 text-right">625.930 €</td>
+                            <td class="p-3">Directo</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                        <tr class="bg-amber-50">
+                            <td class="p-3 font-medium">Inmueble CC</td>
+                            <td class="p-3">Inmobiliario</td>
+                            <td class="p-3"><span class="badge badge-l3">L3</span></td>
+                            <td class="p-3 text-right">458.072 €</td>
+                            <td class="p-3 text-right">458.072 €</td>
+                            <td class="p-3">Directo</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                        
+                        <!-- RF Euro (nuevo) -->
+                        <tr class="bg-teal-50">
+                            <td class="p-3 font-medium">Vanguard Euro Government Bond</td>
+                            <td class="p-3">RF Euro</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">0 €</td>
+                            <td class="p-3 text-right text-green-600 font-semibold">490.000 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 positive font-medium">COMPRAR</td>
+                        </tr>
+                        
+                        <!-- RV Global (nuevo) -->
+                        <tr class="bg-blue-50">
+                            <td class="p-3 font-medium">Vanguard Global Stock Index</td>
+                            <td class="p-3">RV Global</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">0 €</td>
+                            <td class="p-3 text-right text-green-600 font-semibold">350.000 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 positive font-medium">COMPRAR</td>
+                        </tr>
+                        <tr class="bg-blue-50">
+                            <td class="p-3 font-medium">Fundsmith Equity Fund</td>
+                            <td class="p-3">RV Quality</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">0 €</td>
+                            <td class="p-3 text-right text-green-600 font-semibold">100.000 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 positive font-medium">COMPRAR</td>
+                        </tr>
+                        
+                        <!-- Letras Tesoro -->
+                        <tr class="bg-green-50">
+                            <td class="p-3 font-medium">Letras del Tesoro 6-12m</td>
+                            <td class="p-3">Cash/Monetario</td>
+                            <td class="p-3"><span class="badge badge-l0">L0</span></td>
+                            <td class="p-3 text-right">0 €</td>
+                            <td class="p-3 text-right text-green-600 font-semibold">100.000 €</td>
+                            <td class="p-3">Renta 4 / Tesoro</td>
+                            <td class="p-3 positive font-medium">COMPRAR</td>
+                        </tr>
+                        
+                        <!-- Oro -->
+                        <tr class="bg-yellow-50">
+                            <td class="p-3 font-medium">Invesco Physical Gold ETC</td>
+                            <td class="p-3">Oro</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">27.776 €</td>
+                            <td class="p-3 text-right text-green-600 font-semibold">100.000 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 positive font-medium">+72.224 €</td>
+                        </tr>
+                        
+                        <!-- Acciones mantener -->
+                        <tr>
+                            <td class="p-3 font-medium">Airbus</td>
+                            <td class="p-3">RV Europa</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">69.614 €</td>
+                            <td class="p-3 text-right">69.614 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium">Merlin Properties</td>
+                            <td class="p-3">RV España</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">61.448 €</td>
+                            <td class="p-3 text-right">61.448 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                        
+                        <!-- Acciones vender -->
+                        <tr class="bg-red-50">
+                            <td class="p-3 font-medium">Banco Sabadell</td>
+                            <td class="p-3">RV España</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">68.300 €</td>
+                            <td class="p-3 text-right text-red-600">0 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 negative font-medium">VENDER</td>
+                        </tr>
+                        <tr class="bg-red-50">
+                            <td class="p-3 font-medium">Mapfre (acción)</td>
+                            <td class="p-3">RV España</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">65.175 €</td>
+                            <td class="p-3 text-right text-red-600">0 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 negative font-medium">VENDER</td>
+                        </tr>
+                        <tr class="bg-red-50">
+                            <td class="p-3 font-medium">Navigator</td>
+                            <td class="p-3">RV Europa</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">62.126 €</td>
+                            <td class="p-3 text-right text-red-600">0 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 negative font-medium">VENDER</td>
+                        </tr>
+                        <tr class="bg-red-50">
+                            <td class="p-3 font-medium">Rovi</td>
+                            <td class="p-3">RV España</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">56.768 €</td>
+                            <td class="p-3 text-right text-red-600">0 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 negative font-medium">VENDER</td>
+                        </tr>
+                        <tr class="bg-red-50">
+                            <td class="p-3 font-medium">Sacyr</td>
+                            <td class="p-3">RV España</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">52.823 €</td>
+                            <td class="p-3 text-right text-red-600">0 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 negative font-medium">VENDER</td>
+                        </tr>
+                        <tr class="bg-red-50">
+                            <td class="p-3 font-medium">Enagás</td>
+                            <td class="p-3">RV España</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">49.380 €</td>
+                            <td class="p-3 text-right text-red-600">0 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 negative font-medium">VENDER</td>
+                        </tr>
+                        <tr class="bg-red-50">
+                            <td class="p-3 font-medium">Repsol</td>
+                            <td class="p-3">RV España</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">3.798 €</td>
+                            <td class="p-3 text-right text-red-600">0 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 negative font-medium">VENDER</td>
+                        </tr>
+                        
+                        <!-- ETFs temáticos -->
+                        <tr>
+                            <td class="p-3 font-medium">iShares EURO STOXX 50</td>
+                            <td class="p-3">RV Europa</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">48.430 €</td>
+                            <td class="p-3 text-right">48.430 €</td>
+                            <td class="p-3">RL360</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium">VanEck Defense ETF</td>
+                            <td class="p-3">RV Temática</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">30.086 €</td>
+                            <td class="p-3 text-right">30.086 €</td>
+                            <td class="p-3">Mapfre</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium">Invesco Blockchain ETF</td>
+                            <td class="p-3">RV Temática</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">28.789 €</td>
+                            <td class="p-3 text-right">28.789 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium">VanEck Semiconductor ETF</td>
+                            <td class="p-3">RV Temática</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">27.332 €</td>
+                            <td class="p-3 text-right">27.332 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium">Amundi Nasdaq 100</td>
+                            <td class="p-3">RV USA</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">24.560 €</td>
+                            <td class="p-3 text-right">24.560 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium">iShares MSCI India</td>
+                            <td class="p-3">RV Emergentes</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">17.447 €</td>
+                            <td class="p-3 text-right">17.447 €</td>
+                            <td class="p-3">Renta 4</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                        
+                        <!-- Crypto -->
+                        <tr class="bg-orange-50">
+                            <td class="p-3 font-medium">Bitcoin (3 BTC)</td>
+                            <td class="p-3">Crypto</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">~285.000 €</td>
+                            <td class="p-3 text-right text-amber-600">~95.000 € (1 BTC)</td>
+                            <td class="p-3">Exchange</td>
+                            <td class="p-3 negative font-medium">VENDER 2 BTC</td>
+                        </tr>
+                        <tr class="bg-red-50">
+                            <td class="p-3 font-medium">XRP</td>
+                            <td class="p-3">Crypto</td>
+                            <td class="p-3"><span class="badge badge-l1">L1</span></td>
+                            <td class="p-3 text-right">15.000 €</td>
+                            <td class="p-3 text-right text-red-600">0 €</td>
+                            <td class="p-3">Exchange</td>
+                            <td class="p-3 negative font-medium">VENDER TODO</td>
+                        </tr>
+                        <tr class="bg-red-50">
+                            <td class="p-3 font-medium">USDC</td>
+                            <td class="p-3">Stablecoin</td>
+                            <td class="p-3"><span class="badge badge-l0">L0</span></td>
+                            <td class="p-3 text-right">75.000 €</td>
+                            <td class="p-3 text-right text-red-600">0 €</td>
+                            <td class="p-3">Exchange</td>
+                            <td class="p-3 negative font-medium">CONVERTIR A EUR</td>
+                        </tr>
+                        
+                        <!-- Cash -->
+                        <tr class="bg-green-50">
+                            <td class="p-3 font-medium">Cash GBP (Bankinter)</td>
+                            <td class="p-3">Cash</td>
+                            <td class="p-3"><span class="badge badge-l0">L0</span></td>
+                            <td class="p-3 text-right">479.439 €</td>
+                            <td class="p-3 text-right text-amber-600">0 € (convertir)</td>
+                            <td class="p-3">Bankinter → Revolut</td>
+                            <td class="p-3 negative font-medium">CONVERTIR A EUR</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium">Cash USD</td>
+                            <td class="p-3">Cash</td>
+                            <td class="p-3"><span class="badge badge-l0">L0</span></td>
+                            <td class="p-3 text-right">75.000 €</td>
+                            <td class="p-3 text-right">75.000 €</td>
+                            <td class="p-3">Directo</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-medium">Cash EUR (R4 + Bankinter)</td>
+                            <td class="p-3">Cash</td>
+                            <td class="p-3"><span class="badge badge-l0">L0</span></td>
+                            <td class="p-3 text-right">38.238 €</td>
+                            <td class="p-3 text-right">25.000 €</td>
+                            <td class="p-3">R4 / Bankinter</td>
+                            <td class="p-3 neutral">Reducir</td>
+                        </tr>
+                        
+                        <!-- Arte -->
+                        <tr class="bg-pink-50">
+                            <td class="p-3 font-medium">Arte (colección)</td>
+                            <td class="p-3">Alternativos</td>
+                            <td class="p-3"><span class="badge badge-l3">L3</span></td>
+                            <td class="p-3 text-right">350.000 €</td>
+                            <td class="p-3 text-right">350.000 €</td>
+                            <td class="p-3">Directo</td>
+                            <td class="p-3 neutral">Mantener (revisar a medio plazo)</td>
+                        </tr>
+                        
+                        <!-- Fondos wrappers (mantener por penalizaciones) -->
+                        <tr class="bg-indigo-50">
+                            <td class="p-3 font-medium">Janus Henderson Global Select</td>
+                            <td class="p-3">RV Global</td>
+                            <td class="p-3"><span class="badge badge-l2">L2</span></td>
+                            <td class="p-3 text-right">61.184 €</td>
+                            <td class="p-3 text-right">61.184 €</td>
+                            <td class="p-3">RL360</td>
+                            <td class="p-3 neutral">Mantener (penalización)</td>
+                        </tr>
+                        <tr class="bg-indigo-50">
+                            <td class="p-3 font-medium">Vanguard LifeStrategy 80%</td>
+                            <td class="p-3">Mixto</td>
+                            <td class="p-3"><span class="badge badge-l2">L2</span></td>
+                            <td class="p-3 text-right">54.525 €</td>
+                            <td class="p-3 text-right">54.525 €</td>
+                            <td class="p-3">RL360</td>
+                            <td class="p-3 neutral">Mantener (penalización)</td>
+                        </tr>
+                        <tr class="bg-indigo-50">
+                            <td class="p-3 font-medium">Aegon High Yield Global Bond</td>
+                            <td class="p-3">RF High Yield</td>
+                            <td class="p-3"><span class="badge badge-l2">L2</span></td>
+                            <td class="p-3 text-right">39.456 €</td>
+                            <td class="p-3 text-right">39.456 €</td>
+                            <td class="p-3">RL360</td>
+                            <td class="p-3 neutral">Mantener (penalización)</td>
+                        </tr>
+                        <tr class="bg-indigo-50">
+                            <td class="p-3 font-medium">Vanguard Global Small Cap</td>
+                            <td class="p-3">RV Small Cap</td>
+                            <td class="p-3"><span class="badge badge-l2">L2</span></td>
+                            <td class="p-3 text-right">26.981 €</td>
+                            <td class="p-3 text-right">26.981 €</td>
+                            <td class="p-3">RL360</td>
+                            <td class="p-3 neutral">Mantener (penalización)</td>
+                        </tr>
+                        <tr class="bg-indigo-50">
+                            <td class="p-3 font-medium">Otros fondos Mapfre/Utmost</td>
+                            <td class="p-3">Varios</td>
+                            <td class="p-3"><span class="badge badge-l2">L2</span></td>
+                            <td class="p-3 text-right">~80.000 €</td>
+                            <td class="p-3 text-right">~80.000 €</td>
+                            <td class="p-3">Mapfre/Utmost</td>
+                            <td class="p-3 neutral">Revisar Utmost (¿libre?)</td>
+                        </tr>
+                        
+                        <!-- Pensiones -->
+                        <tr>
+                            <td class="p-3 font-medium">MAPFRE Renta Plan Pensiones</td>
+                            <td class="p-3">Pensiones</td>
+                            <td class="p-3"><span class="badge badge-l2">L2</span></td>
+                            <td class="p-3 text-right">37.765 €</td>
+                            <td class="p-3 text-right">37.765 €</td>
+                            <td class="p-3">Mapfre</td>
+                            <td class="p-3 neutral">Mantener</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Resumen ejecutivo -->
+        <section class="card p-6 mb-8 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">📌 Resumen Ejecutivo</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <h3 class="font-medium text-gray-700 mb-2">Cambios principales</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• GBP → RF Euro: +€490K</li>
+                        <li>• Crypto reducido: -€200K</li>
+                        <li>• Acciones ES simplificadas: -€200K</li>
+                        <li>• RV Global indexada: +€450K</li>
+                        <li>• Oro incrementado: +€72K</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-700 mb-2">Resultado esperado</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• Volatilidad cartera: ↓ de ~12% a ~7%</li>
+                        <li>• Costes anuales: ↓ de ~€14K a ~€3K</li>
+                        <li>• Diversificación: ↑ significativa</li>
+                        <li>• Dependencia España: ↓ drástica</li>
+                        <li>• Posiciones: de 46 a ~25</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-700 mb-2">Próximos pasos inmediatos</h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>1. Transferir £140K a Revolut</li>
+                        <li>2. Poner alerta GBP/EUR ≥1.17</li>
+                        <li>3. Convertir USDC a EUR</li>
+                        <li>4. Consultar rescate Utmost</li>
+                        <li>5. Revisar ISINs en Renta 4</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ISINs de referencia -->
+        <section class="card p-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">🔗 ISINs de Referencia para Renta 4</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <p class="font-medium">Vanguard Euro Government Bond</p>
+                    <p class="text-gray-500">ISIN: IE00BH04GL39 | TER: 0.07%</p>
+                </div>
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <p class="font-medium">Vanguard Global Stock Index Fund</p>
+                    <p class="text-gray-500">ISIN: IE00B03HCZ61 | TER: 0.18%</p>
+                </div>
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <p class="font-medium">Fundsmith Equity Fund T EUR Acc</p>
+                    <p class="text-gray-500">ISIN: LU0690375182 | TER: 0.95%</p>
+                </div>
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <p class="font-medium">Invesco Physical Gold ETC</p>
+                    <p class="text-gray-500">ISIN: IE00B579F325 | TER: 0.12%</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-400 py-6 px-8 mt-12">
+        <div class="max-w-7xl mx-auto text-center text-sm">
+            <p>Dashboard generado para Enrique · Diciembre 2024</p>
+            <p class="mt-1">Este documento es orientativo y no constituye asesoramiento financiero profesional.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Gráfico Asignación Actual
+        const ctxActual = document.getElementById('chartActual').getContext('2d');
+        new Chart(ctxActual, {
+            type: 'doughnut',
+            data: {
+                labels: ['Inmobiliario', 'Cash', 'RV España', 'ETFs', 'Fondos', 'Arte', 'Crypto', 'Oro', 'Pensiones', 'GBP pendiente'],
+                datasets: [{
+                    data: [47.2, 2.5, 7.0, 2.8, 5.5, 7.4, 6.3, 0.6, 0.8, 10.1],
+                    backgroundColor: [
+                        '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#6366f1', 
+                        '#ec4899', '#f97316', '#eab308', '#6b7280', '#f87171'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                cutout: '60%'
+            }
+        });
+
+        // Gráfico Asignación Objetivo
+        const ctxObjetivo = document.getElementById('chartObjetivo').getContext('2d');
+        new Chart(ctxObjetivo, {
+            type: 'doughnut',
+            data: {
+                labels: ['Inmobiliario', 'Cash/Letras', 'RF Euro', 'RV Global', 'RV España', 'ETFs', 'Fondos', 'Arte', 'Crypto', 'Oro'],
+                datasets: [{
+                    data: [47.2, 4.2, 10.3, 15.8, 2.7, 2.8, 5.5, 7.4, 2.1, 2.1],
+                    backgroundColor: [
+                        '#f59e0b', '#10b981', '#14b8a6', '#2563eb', '#60a5fa',
+                        '#8b5cf6', '#6366f1', '#ec4899', '#f97316', '#ca8a04'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                cutout: '60%'
+            }
+        });
+    </script>
+</body>
+</html>
